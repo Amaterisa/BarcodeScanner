@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
@@ -34,7 +35,7 @@ class BarcodeScannerActivity : AppCompatActivity() {
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (isCameraPermissionGranted()) {
             startCamera()
         } else {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA)
@@ -47,6 +48,10 @@ class BarcodeScannerActivity : AppCompatActivity() {
         processingBarcode.set(false)
     }
 
+    private fun isCameraPermissionGranted(): Boolean{
+        return ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+    }
+
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
@@ -57,6 +62,7 @@ class BarcodeScannerActivity : AppCompatActivity() {
                 )
             }
             val imageAnalysis = ImageAnalysis.Builder()
+                .setTargetResolution(Size(1280, 720))
                 .build()
                 .also {
                     it.setAnalyzer(cameraExecutor, BarcodeAnalyzer { barcode ->
